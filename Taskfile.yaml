@@ -1,0 +1,38 @@
+version: '3'
+
+tasks:
+
+  lint:
+    desc: Run linters
+    cmds:
+      - uv run mypy src
+      - uv run pyright
+      - uv run ruff check
+      - uv run ruff format --check
+
+  format:
+    desc: Run formatters
+    cmds:
+      - uv run ruff format
+
+  bump:
+    desc: Bump package version
+    cmds:
+      - uv run bump-my-version bump {{.CLI_ARGS}}
+      - uv lock
+
+  build:
+    desc: Build package
+    cmds:
+      - rm -rf dist
+      - uv build
+
+  publish:
+    desc: Publish package on PyPI
+    deps: [build]
+    vars:
+      TOKEN: {sh: uv run keyring get dev.pypi.token.argiletum argiletum}
+    env:
+      UV_PUBLISH_TOKEN: '{{.TOKEN}}'
+    cmds:
+      - uv publish
